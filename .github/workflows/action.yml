@@ -1,0 +1,43 @@
+# GitHub Pages にデプロイ
+name: Publish Web Folder
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+    - 'Web/**/**.*'
+
+  workflow_dispatch:
+
+# GithubPagesにデプロイできるようにGITHUB_TOKENの権限を設定
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 連続プッシュの時に古いワークフローをキャンセル
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          lfs: true
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          # Upload entire repository
+          path: './Web'
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v1
