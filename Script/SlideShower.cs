@@ -10,7 +10,7 @@ using VRC.Udon.Common.Interfaces;
 public class SlideShower : UdonSharpBehaviour
 {
     [SerializeField, Tooltip("ロードするURL")]
-    private VRCUrl[] imageUrls;
+    public VRCUrl[] imageUrls;
 
     [SerializeField, Tooltip("表示するレンダーテクスチャ")]
     private new Renderer renderer;
