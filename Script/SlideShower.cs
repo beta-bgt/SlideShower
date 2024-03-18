@@ -55,13 +55,72 @@ public class SlideShower : UdonSharpBehaviour
         if (nextTexture != null)
         {
             // Image already downloaded! No need to download it again.
-            renderer.sharedMaterial.mainTexture = nextTexture;
+            ShowNext(nextTexture);
         }
         else
         {
             var rgbInfo = new TextureInfo();
             rgbInfo.GenerateMipMaps = true;
-            _imageDownloader.DownloadImage(imageUrls[_loadedIndex], renderer.material, _udonEventReceiver, rgbInfo);
+            _imageDownloader.DownloadImage(imageUrls[_loadedIndex], renderer.sharedMaterial, _udonEventReceiver, rgbInfo);
+        }
+    }
+
+    bool changing = false;
+    void StartChange()
+    {
+        changing = true;
+    }
+    void StopChange()
+    {
+        changing = false;
+    }
+
+    bool tex1ToTex2 = true;
+    private void ShowNext(Texture2D tex)
+    {
+        if (!tex1ToTex2)
+        {
+            renderer.sharedMaterial.SetTexture("_Tex1", tex);
+        }
+        else
+        {
+            renderer.sharedMaterial.SetTexture("_Tex2", tex);
+        }
+        StartChange();
+    }
+
+    [SerializeField] float changeTime = 5f;
+    float timeWatch = 0f;
+    void Update()
+    {
+        if (changing)
+        {
+            if (timeWatch > changeTime)
+            {
+                timeWatch = changeTime;
+            }
+
+            float lerp = 1 - (changeTime - timeWatch) / changeTime;
+
+            if (tex1ToTex2)
+            {
+                renderer.sharedMaterial.SetFloat("_Lerp", lerp);
+            }
+            else
+            {
+                renderer.sharedMaterial.SetFloat("_Lerp", 1 - lerp);
+            }
+
+            if (timeWatch < changeTime)
+            {
+                timeWatch += Time.deltaTime;
+            }
+            else
+            {
+                StopChange();
+                tex1ToTex2 = !tex1ToTex2;
+                timeWatch = 0f;
+            }
         }
     }
 
@@ -69,6 +128,7 @@ public class SlideShower : UdonSharpBehaviour
     {
         Debug.Log($"Image loaded: {result.SizeInMemoryBytes} bytes.");
 
+        ShowNext(result.Result);
         _downloadedTextures[_loadedIndex] = result.Result;
     }
 
