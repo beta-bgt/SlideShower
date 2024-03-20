@@ -12,8 +12,8 @@ public class SlideShower : UdonSharpBehaviour
     [SerializeField, Tooltip("ロードするURL")]
     public VRCUrl[] imageUrls;
 
-    [SerializeField, Tooltip("表示するレンダーテクスチャ(写真を表示するマテリアルを一番上にしてね！)")]
-    private new Renderer[] renderers;
+    [SerializeField]
+    public PhotoStand[] photoStands;
 
     [SerializeField, Tooltip("スライド時間")]
     private float slideDurationSeconds = 10f;
@@ -22,20 +22,13 @@ public class SlideShower : UdonSharpBehaviour
     private int _slidePictureIndex = -1;
     private VRCImageDownloader _imageDownloader;
     private IUdonEventReceiver _udonEventReceiver;
-    private string[] _captions = new string[0];
     private Texture2D[] _downloadedTextures;
-    private bool[] _tex1ToTex2s;
+    private PhotoStand _targetPhotoStand;
 
     private void Start()
     {
         // ダウンロードしたテクスチャをキャッシュしておく箱.
         _downloadedTextures = new Texture2D[imageUrls.Length];
-
-        _tex1ToTex2s = new bool[renderers.Length];
-        for (int i = 0; i < renderers.Length; i++)
-        {
-            _tex1ToTex2s[i] = true;
-        }
 
         // ガベージコレクションが行われないようにVRCImageDownloaderを保存しておく
         _imageDownloader = new VRCImageDownloader();
@@ -58,7 +51,7 @@ public class SlideShower : UdonSharpBehaviour
         // All clients share the same server time. That's used to sync the currently displayed image.
         int counter = (int)(Networking.GetServerTimeInMilliseconds() / 1000f / slideDurationSeconds);
         _loadedIndex = counter % imageUrls.Length;
-        _slidePictureIndex = counter % renderers.Length;
+        _slidePictureIndex = counter % photoStands.Length;
 
         var nextTexture = _downloadedTextures[_loadedIndex];
 
@@ -71,8 +64,39 @@ public class SlideShower : UdonSharpBehaviour
         {
             var rgbInfo = new TextureInfo();
             rgbInfo.GenerateMipMaps = true;
-            _imageDownloader.DownloadImage(imageUrls[_loadedIndex], renderers[_slidePictureIndex].material, _udonEventReceiver, rgbInfo);
+            Debug.Log(photoStands.Length.ToString());
+            Debug.Log(_slidePictureIndex.ToString());
+            _imageDownloader.DownloadImage(imageUrls[_loadedIndex], photoStands[_slidePictureIndex].renderer.material, _udonEventReceiver, rgbInfo);
         }
+    }
+
+    private PhotoStand SelectPhotoStand(Texture2D tex, int targetPhotoStandIndex)
+    {
+        int selectIndex = targetPhotoStandIndex;
+        for (int i = 0; i < photoStands.Length; i++)
+        {
+            if (photoStands[selectIndex].isHorizontal == tex.width > tex.height)
+            {
+                return photoStands[selectIndex];
+            }
+            selectIndex = (selectIndex + 1) % photoStands.Length;
+        }
+        // 見つからなかった場合は仕方ないのでもともと選択されていたものを返す
+        return photoStands[targetPhotoStandIndex];
+    }
+
+    private void ShowNext(Texture2D tex)
+    {
+        _targetPhotoStand = SelectPhotoStand(tex, _slidePictureIndex);
+        if (!_targetPhotoStand.tex1ToTex2)
+        {
+            _targetPhotoStand.renderer.sharedMaterial.SetTexture("_Tex1", tex);
+        }
+        else
+        {
+            _targetPhotoStand.renderer.sharedMaterial.SetTexture("_Tex2", tex);
+        }
+        StartChange();
     }
 
     bool changing = false;
@@ -83,19 +107,6 @@ public class SlideShower : UdonSharpBehaviour
     void StopChange()
     {
         changing = false;
-    }
-
-    private void ShowNext(Texture2D tex)
-    {
-        if (!_tex1ToTex2s[_slidePictureIndex])
-        {
-            renderers[_slidePictureIndex].sharedMaterial.SetTexture("_Tex1", tex);
-        }
-        else
-        {
-            renderers[_slidePictureIndex].sharedMaterial.SetTexture("_Tex2", tex);
-        }
-        StartChange();
     }
 
     [SerializeField] float changeTime = 5f;
@@ -111,13 +122,13 @@ public class SlideShower : UdonSharpBehaviour
 
             float lerp = 1 - (changeTime - timeWatch) / changeTime;
 
-            if (_tex1ToTex2s[_slidePictureIndex])
+            if (_targetPhotoStand.tex1ToTex2)
             {
-                renderers[_slidePictureIndex].sharedMaterial.SetFloat("_Lerp", lerp);
+                _targetPhotoStand.renderer.sharedMaterial.SetFloat("_Lerp", lerp);
             }
             else
             {
-                renderers[_slidePictureIndex].sharedMaterial.SetFloat("_Lerp", 1 - lerp);
+                _targetPhotoStand.renderer.sharedMaterial.SetFloat("_Lerp", 1 - lerp);
             }
 
             if (timeWatch < changeTime)
@@ -127,7 +138,7 @@ public class SlideShower : UdonSharpBehaviour
             else
             {
                 StopChange();
-                _tex1ToTex2s[_slidePictureIndex] = !_tex1ToTex2s[_slidePictureIndex];
+                _targetPhotoStand.tex1ToTex2 = !_targetPhotoStand.tex1ToTex2;
                 timeWatch = 0f;
             }
         }
