@@ -1,13 +1,11 @@
 ﻿using UdonSharp;
 using UnityEngine;
-using UnityEngine.UI;
 using VRC.SDK3.Image;
-using VRC.SDK3.StringLoading;
 using VRC.SDKBase;
 using VRC.Udon.Common.Interfaces;
 
 [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
-public class SlideShower : UdonSharpBehaviour
+public class SlideShower : TaskObject
 {
     [SerializeField, Tooltip("ロードするURL")]
     public VRCUrl[] imageUrls;
@@ -18,14 +16,14 @@ public class SlideShower : UdonSharpBehaviour
     [SerializeField, Tooltip("スライド時間")]
     private float slideDurationSeconds = 10f;
 
-    private int _loadedIndex = -1;
-    private int _slidePictureIndex = -1;
+    private int _loadedIndex = 0;
+    private int _slidePictureIndex = 0;
     private VRCImageDownloader _imageDownloader;
     private IUdonEventReceiver _udonEventReceiver;
     private Texture2D[] _downloadedTextures;
     private PhotoStand _targetPhotoStand;
 
-    private void Start()
+    public override void Start()
     {
         // ダウンロードしたテクスチャをキャッシュしておく箱.
         _downloadedTextures = new Texture2D[imageUrls.Length];
@@ -49,9 +47,12 @@ public class SlideShower : UdonSharpBehaviour
     private void LoadNext()
     {
         // All clients share the same server time. That's used to sync the currently displayed image.
-        int counter = (int)(Networking.GetServerTimeInMilliseconds() / 1000f / slideDurationSeconds);
+        int counter = (int)(GetServerTimeInMilliseconds() / 1000f / slideDurationSeconds);
         _loadedIndex = counter % imageUrls.Length;
         _slidePictureIndex = counter % photoStands.Length;
+
+        LogClear();
+        DebugLog("GetServerTimeInMilliseconds()=" + GetServerTimeInMilliseconds().ToString());
 
         var nextTexture = _downloadedTextures[_loadedIndex];
 
@@ -64,26 +65,10 @@ public class SlideShower : UdonSharpBehaviour
         {
             var rgbInfo = new TextureInfo();
             rgbInfo.GenerateMipMaps = true;
-            Debug.Log(photoStands.Length.ToString());
-            Debug.Log(_slidePictureIndex.ToString());
             _imageDownloader.DownloadImage(imageUrls[_loadedIndex], photoStands[_slidePictureIndex].renderer.material, _udonEventReceiver, rgbInfo);
         }
     }
 
-    private PhotoStand SelectPhotoStand(Texture2D tex, int targetPhotoStandIndex)
-    {
-        int selectIndex = targetPhotoStandIndex;
-        for (int i = 0; i < photoStands.Length; i++)
-        {
-            if (photoStands[selectIndex].isHorizontal == tex.width > tex.height)
-            {
-                return photoStands[selectIndex];
-            }
-            selectIndex = (selectIndex + 1) % photoStands.Length;
-        }
-        // 見つからなかった場合は仕方ないのでもともと選択されていたものを返す
-        return photoStands[targetPhotoStandIndex];
-    }
 
     private void ShowNext(Texture2D tex)
     {
@@ -97,6 +82,21 @@ public class SlideShower : UdonSharpBehaviour
             _targetPhotoStand.renderer.sharedMaterial.SetTexture("_Tex2", tex);
         }
         StartChange();
+    }
+
+    private PhotoStand SelectPhotoStand(Texture2D tex, int targetPhotoStandIndex)
+    {
+        int selectIndex = targetPhotoStandIndex;
+        for (int i = 0; i < photoStands.Length; i++)
+        {
+            if (photoStands[selectIndex].isHorizontal == tex.width > tex.height)
+            {
+                return PhotoStand.GetOldestPhotoStand(photoStands, photoStands[selectIndex].isHorizontal);
+            }
+            selectIndex = (selectIndex + 1) % photoStands.Length;
+        }
+        // 見つからなかった場合は仕方ないのでもともと選択されていたものを返す
+        return photoStands[targetPhotoStandIndex];
     }
 
     bool changing = false;

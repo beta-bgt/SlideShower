@@ -1,11 +1,10 @@
 using UnityEngine;
 using UnityEditor;
 using VRC.SDKBase;
-using BetaExtensions;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
+
 [CustomEditor(typeof(SlideShower))]
 public class ImageUrlUpdater : SavedEditor
 {
