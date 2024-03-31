@@ -23,6 +23,9 @@ public class ImageUrlUpdater : SavedEditor
 
         if (GUILayout.Button("ImageUrlUpdate"))
         {
+            //Undoできるように保存
+            Undo.RecordObject(target, "Update URLImage");
+
             // 写真の名前を取得する
             List<string> pictNames = GetFiles(pictDirectory, "png").ToList();
 
@@ -32,6 +35,9 @@ public class ImageUrlUpdater : SavedEditor
             // ImageUrlのセッティング
             SlideShower slideShower = (SlideShower)target;
             slideShower.imageUrls = imageUrlStrings.Select(str => new VRCUrl(str)).ToArray();
+
+            // インスペクタの保存
+            EditorUtility.SetDirty(slideShower);
         }
         DrawDefaultInspector();
 
