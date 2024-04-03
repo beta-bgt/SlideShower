@@ -1,0 +1,20 @@
+{
+    "name": "BettaBeta.SlideShower",
+    "rootNamespace": "",
+    "references": [
+        "VRC.SDK3",
+        "VRC.Udon",
+        "VRC.Udon.Serialization.OdinSerializer",
+        "UdonSharp.Runtime",
+        "BettaBeta"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

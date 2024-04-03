@@ -1,0 +1,21 @@
+{
+    "name": "BettaBeta.SlideShower.Editor",
+    "rootNamespace": "",
+    "references": [
+        "UdonSharp.Runtime",
+        "BettaBeta",
+        "BettaBeta.Editor",
+        "BettaBeta.SlideShower"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

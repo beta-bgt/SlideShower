@@ -4,6 +4,8 @@ using VRC.SDKBase;
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
+using BettaBeta;
+using BettaBeta.SlideShower;
 
 [CustomEditor(typeof(SlideShower))]
 public class ImageUrlUpdater : SavedEditor

@@ -21,7 +21,7 @@ MonoBehaviour:
   compiledVersion: 2
   behaviourSyncMode: 1
   hasInteractEvent: 0
-  scriptID: -5594348818589681330
+  scriptID: -1991446453072135054
   serializationData:
     SerializedFormat: 2
     SerializedBytes: 
@@ -191,7 +191,7 @@ MonoBehaviour:
       Data: 12|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
-      Data: PhotoStand[], Assembly-CSharp
+      Data: BettaBeta.SlideShower.PhotoStand[], BettaBeta.SlideShower
     - Name: 
       Entry: 8
       Data: 
@@ -590,7 +590,7 @@ MonoBehaviour:
       Data: 36|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
-      Data: PhotoStand, Assembly-CSharp
+      Data: BettaBeta.SlideShower.PhotoStand, BettaBeta.SlideShower
     - Name: 
       Entry: 8
       Data: 
