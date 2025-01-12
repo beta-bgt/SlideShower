@@ -3,7 +3,7 @@
     "rootNamespace": "",
     "references": [
         "UdonSharp.Runtime",
-        "BettaBeta",
+        "BettaBeta.Runtime",
         "BettaBeta.Editor",
         "BettaBeta.SlideShower"
     ],

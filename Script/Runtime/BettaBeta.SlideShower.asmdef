@@ -6,7 +6,7 @@
         "VRC.Udon",
         "VRC.Udon.Serialization.OdinSerializer",
         "UdonSharp.Runtime",
-        "BettaBeta"
+        "BettaBeta.Runtime"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
