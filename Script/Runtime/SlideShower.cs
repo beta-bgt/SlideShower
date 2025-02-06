@@ -36,6 +36,12 @@ namespace BettaBeta.SlideShower
             // イメージをロードするためにIUdonEventReceiverをキャストして取得
             _udonEventReceiver = (IUdonEventReceiver)this;
 
+            // photoStandsのMaterialを新たに生成しておく
+            foreach (var photoStand in photoStands)
+            {
+                photoStand.renderer.material = photoStand.renderer.material;
+            }
+
             // イメージを再帰的にダウンロード
             LoadNextRecursive();
         }
@@ -64,14 +70,14 @@ namespace BettaBeta.SlideShower
             {
                 var rgbInfo = new TextureInfo();
                 rgbInfo.GenerateMipMaps = true;
-                _imageDownloader.DownloadImage(imageUrls[_loadedIndex], photoStands[_slidePictureIndex].renderer.material, _udonEventReceiver, rgbInfo);
+                _imageDownloader.DownloadImage(imageUrls[_loadedIndex], null, _udonEventReceiver, rgbInfo);
             }
         }
 
 
         private void ShowNext(Texture2D tex)
         {
-            _targetPhotoStand = SelectPhotoStand(tex, _slidePictureIndex);
+            _targetPhotoStand = SelectPhotoStand(tex);
             if (!_targetPhotoStand.tex1ToTex2)
             {
                 _targetPhotoStand.renderer.sharedMaterial.SetTexture("_Tex1", tex);
@@ -83,19 +89,19 @@ namespace BettaBeta.SlideShower
             StartChange();
         }
 
-        private PhotoStand SelectPhotoStand(Texture2D tex, int targetPhotoStandIndex)
+        private PhotoStand SelectPhotoStand(Texture2D tex)
         {
-            int selectIndex = targetPhotoStandIndex;
-            for (int i = 0; i < photoStands.Length; i++)
+            int selectIndex = _slidePictureIndex;
+            for (int _ = 0; _ < photoStands.Length; _++)
             {
                 if (photoStands[selectIndex].isHorizontal == tex.width > tex.height)
                 {
-                    return PhotoStand.GetOldestPhotoStand(photoStands, photoStands[selectIndex].isHorizontal);
+                    return photoStands[selectIndex];
                 }
                 selectIndex = (selectIndex + 1) % photoStands.Length;
             }
             // 見つからなかった場合は仕方ないのでもともと選択されていたものを返す
-            return photoStands[targetPhotoStandIndex];
+            return photoStands[_slidePictureIndex];
         }
 
         bool changing = false;
