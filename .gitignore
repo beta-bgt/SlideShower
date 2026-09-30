@@ -70,3 +70,17 @@ crashlytics-build.properties
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
+
+# Blender のファイル（バックアップを含む）は管理しない
+*.blend
+*.blend.meta
+*.blend[0-9]*
+*.blend@
+
+# Substance のファイルは管理しない
+*.spp
+*.spp.meta
+*.sbs
+*.sbs.meta
+*.sbsar
+*.sbsar.meta
